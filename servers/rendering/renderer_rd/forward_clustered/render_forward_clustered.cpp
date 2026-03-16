@@ -3189,12 +3189,13 @@ void RenderForwardClustered::base_uniforms_changed() {
 void RenderForwardClustered::_update_render_base_uniform_set() {
 	RendererRD::LightStorage *light_storage = RendererRD::LightStorage::get_singleton();
 
-	if (render_base_uniform_set.is_null() || !RD::get_singleton()->uniform_set_is_valid(render_base_uniform_set) || (lightmap_texture_array_version != light_storage->lightmap_array_get_version())) {
+	if (render_base_uniform_set.is_null() || !RD::get_singleton()->uniform_set_is_valid(render_base_uniform_set) || (lightmap_texture_array_version != light_storage->lightmap_array_get_version()) || (directional_projector_texture != light_storage->get_directional_projector_texture())) {
 		if (render_base_uniform_set.is_valid() && RD::get_singleton()->uniform_set_is_valid(render_base_uniform_set)) {
 			RD::get_singleton()->free_rid(render_base_uniform_set);
 		}
 
 		lightmap_texture_array_version = light_storage->lightmap_array_get_version();
+		directional_projector_texture = light_storage->get_directional_projector_texture();
 
 		Vector<RD::Uniform> uniforms;
 
@@ -3372,6 +3373,15 @@ void RenderForwardClustered::_update_render_base_uniform_set() {
 			u.uniform_type = RD::UNIFORM_TYPE_TEXTURE;
 			RID area_light_atlas = RendererRD::TextureStorage::get_singleton()->area_light_atlas_get_texture();
 			u.append_id(area_light_atlas);
+			uniforms.push_back(u);
+		}
+		{
+			RD::Uniform u;
+			u.binding = 21;
+			u.uniform_type = RD::UNIFORM_TYPE_TEXTURE;
+			RID proj_tex = light_storage->get_directional_projector_texture();
+			RID fallback = RendererRD::TextureStorage::get_singleton()->texture_rd_get_default(RendererRD::TextureStorage::DEFAULT_RD_TEXTURE_WHITE);
+			u.append_id(proj_tex.is_valid() && RD::get_singleton()->texture_is_valid(proj_tex) ? proj_tex : fallback);
 			uniforms.push_back(u);
 		}
 
