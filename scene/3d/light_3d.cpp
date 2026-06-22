@@ -231,7 +231,7 @@ void Light3D::set_projector(const Ref<Texture2D> &p_texture) {
 				p_texture->is_class("Texture2DRD");
 		// ViewportTexture is supported for directional lights (separate texture binding),
 		// but not for omni/spot lights (decal atlas).
-		if (type != RS::LIGHT_DIRECTIONAL) {
+		if (type != RSE::LIGHT_DIRECTIONAL) {
 			is_unsupported = is_unsupported || p_texture->is_class("ViewportTexture");
 		}
 		if (is_unsupported) {
